@@ -24,7 +24,6 @@ class GUI:
         self.c.pack()
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
-        self.c.bind('<ButtonRelease-1>', self.callback)
 
     def set_draw(self, event):
         row, col = self.get_rc(event.x, event.y)
@@ -32,6 +31,7 @@ class GUI:
             self.draw = True
         else:
             self.draw = False
+        self.callback(event)
 
     def render(self):
         root = tk.Tk()
