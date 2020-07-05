@@ -1,5 +1,6 @@
 import logging
 import tkinter as tk
+from Pathfinders import *
 
 LOGGER = logging.getLogger(__name__)
 
@@ -10,7 +11,8 @@ TOPPANEL_H = 100
 class GUI:
     def __init__(self, rows, cols):
         self.draw = True
-        self.mode = 'none'
+        self.mode = 'wall'
+        self.type = 'dijkstra'
         self.start = (-1, -1)
         self.end = (-1, -1)
         self.rows = rows
@@ -75,6 +77,7 @@ class GUI:
         self.topFrame.columnconfigure(0, weight=1)
         self.create_buttons(self.topFrame)
 
+    # Creates the bottom panel (canvas) within the window
     def bottom_panel(self):
         self.btmFrame = tk.Frame(
             self.window, width=DEFAULT_WH, height=(DEFAULT_WH-TOPPANEL_H))
@@ -186,3 +189,7 @@ class GUI:
             self.grid[row][col] = self.draw_rectangle(row, col, color='black')
         elif self.grid[row][col] and not self.draw:
             self.delete_rectangle(row, col)
+
+    # Main running function
+    def run(self, type):
+        return
