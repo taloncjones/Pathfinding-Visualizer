@@ -8,9 +8,9 @@ TOPPANEL_H = 100
 
 class GUI:
     def __init__(self, rows, cols):
-        self.draw = True
-        self.start = False
-        self.end = False
+        self.draw = 'none'
+        self.start = (-1, -1)
+        self.end = (-1, -1)
         self.rows = rows
         self.cols = cols
         self.grid = [[None for _ in range(self.cols)]
@@ -26,42 +26,50 @@ class GUI:
         self.window = root
 
     # Create canvas with click and click-drag events and stores as self.c
-    def create_canvas(self, frame, row=0, col=0):
-        self.c = tk.Canvas(self.window, width=DEFAULT_WH, height=DEFAULT_WH,
+    def create_canvas(self, frame, row=0, column=0):
+        self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH,
                            borderwidth=5, background='grey')
-        self.c.grid(row=row, column=col)
+        self.c.grid(row=row, column=column)
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
 
     def create_buttons(self, frame):
-        btnFrame = tk.Frame(frame, width=DEFAULT_WH, height=200)
-        btnFrame.grid(row=1, column=0, padx=10, pady=2)
-        startBtn = tk.Button(btnFrame, text='Start', command=None)
-        startBtn.grid(row=1, column=0, padx=10, pady=2)
-        wallBtn = tk.Button(btnFrame, text='Wall', command=None)
-        wallBtn.grid(row=1, column=1, padx=10, pady=2)
-        endBtn = tk.Button(btnFrame, text='End', command=None)
-        endBtn.grid(row=1, column=2, padx=10, pady=2)
-        goBtn = tk.Button(btnFrame, text='GO!', command=None)
-        goBtn.grid(row=1, column=3, padx=10, pady=2)
+        self.btnFrame = tk.Frame(frame, width=DEFAULT_WH, height=200)
+        self.btnFrame.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
+        self.btnFrame.columnconfigure(0, weight=1)
+        self.btnFrame.columnconfigure(1, weight=1)
+        self.btnFrame.columnconfigure(2, weight=1)
+        self.btnFrame.columnconfigure(3, weight=1)
+        self.btnFrame.columnconfigure(4, weight=5)
+        self.btnFrame.columnconfigure(5, weight=1)
+        startBtn = tk.Button(self.btnFrame, text='Start', command=lambda:self.set_mode('start'))
+        startBtn.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
+        wallBtn = tk.Button(self.btnFrame, text='Wall', command=lambda:self.set_mode('wall'))
+        wallBtn.grid(row=1, column=1, padx=10, pady=2, sticky=tk.W+tk.E)
+        endBtn = tk.Button(self.btnFrame, text='End', command=lambda:self.set_mode('end'))
+        endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
+        goBtn = tk.Button(self.btnFrame, text='GO!', command=None)
+        goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
+        self.set_status(row=1, column=4)
+        clearBtn = tk.Button(self.btnFrame, text='Clear Grid', command=None)
+        clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
 
     # Creates the top panel within the window
     def top_panel(self):
         self.topFrame = tk.Frame(self.window, width=DEFAULT_WH, height=TOPPANEL_H)
-        self.topFrame.grid(row=0, column=0)
-        tk.Label(self.topFrame, text='Controls:').grid(row=0, column=0, padx=10, pady=2)
+        self.topFrame.grid(row=0, column=0, sticky=tk.W+tk.E)
+        self.topFrame.columnconfigure(0, weight=1)
         self.create_buttons(self.topFrame)
 
     def bottom_panel(self):
         self.btmFrame = tk.Frame(self.window, width=DEFAULT_WH, height=(DEFAULT_WH-TOPPANEL_H))
         self.btmFrame.grid(row=1, column=0)
-        self.create_canvas(self.btmFrame, row=1)
+        self.create_canvas(self.btmFrame)
 
     def render(self):
         self.create_window()
         self.top_panel()
         self.bottom_panel()
-        # self.create_canvas()
         LOGGER.debug('Launching...')
         self.window.mainloop()
 
@@ -84,6 +92,19 @@ class GUI:
             (row+width)*r_height,
             fill=color)
 
+    # Set the status text
+    def set_status(self, row=0, column=0):
+        try:
+            self.status['text'] = 'Current Mode: {0}'.format(self.draw.upper())
+        except AttributeError:
+            self.status = tk.Label(self.btnFrame, width=25, text='Current Mode: {0}'.format(self.draw.upper()))
+            self.status.grid(row=row, column=column, padx=10, pady=2, sticky=tk.W+tk.E)
+
+    # Set the drawing mode (start, end, walls)
+    def set_mode(self, mode):
+        self.draw = mode
+        self.set_status()
+
     # Inverts grid[row][col] at x, y and stores in self.draw. Then calls self.callback for click and drag drawing
     def set_draw(self, event):
         row, col = self.get_rc(event.x, event.y)
@@ -96,6 +117,10 @@ class GUI:
     # Draws/erases rectangles at given x, y coordinates when called as event
     def callback(self, event):
         row, col = self.get_rc(event.x, event.y)
+
+        # If mouse goes out of bounds, prevent error spam in logs
+        if len(self.grid) <= row or len(self.grid[0]) <= col:
+            return
 
         if not self.grid[row][col] and self.draw:
             self.grid[row][col] = self.draw_rectangle(row, col, color='black')
