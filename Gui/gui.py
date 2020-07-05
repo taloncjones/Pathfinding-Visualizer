@@ -54,7 +54,8 @@ class GUI:
         endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(2, weight=1)
 
-        goBtn = tk.Button(self.btnFrame, text='GO!', command=lambda: LOGGER.debug(self.grid))
+        goBtn = tk.Button(self.btnFrame, text='GO!',
+                          command=lambda: LOGGER.debug(self.grid))
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
@@ -148,10 +149,24 @@ class GUI:
             self.callback(event)
         elif self.mode == 'start':
             r, c = self.start
-            self.delete_rectangle(r, c)
+
+            # Prevent deleting bottom right square if (-1,-1)
+            if r >= 0 and c >= 0:
+                self.delete_rectangle(r, c)
+
             self.start = (row, col)
             self.delete_rectangle(row, col)
             self.grid[row][col] = self.draw_rectangle(row, col, color='green')
+        elif self.mode == 'end':
+            r, c = self.end
+
+            # Prevent deleting bottom right square if (-1,-1)
+            if r >= 0 and c >= 0:
+                self.delete_rectangle(r, c)
+
+            self.end = (row, col)
+            self.delete_rectangle(row, col)
+            self.grid[row][col] = self.draw_rectangle(row, col, color='red')
 
     # Draws/erases rectangles at given x, y coordinates when called as event
     def callback(self, event):
