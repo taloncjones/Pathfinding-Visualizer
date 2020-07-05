@@ -8,7 +8,8 @@ TOPPANEL_H = 100
 
 class GUI:
     def __init__(self, rows, cols):
-        self.draw = 'none'
+        self.draw = True
+        self.mode = 'none'
         self.start = (-1, -1)
         self.end = (-1, -1)
         self.rows = rows
@@ -51,7 +52,7 @@ class GUI:
         goBtn = tk.Button(self.btnFrame, text='GO!', command=None)
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.set_status(row=1, column=4)
-        clearBtn = tk.Button(self.btnFrame, text='Clear Grid', command=None)
+        clearBtn = tk.Button(self.btnFrame, text='Clear Grid', command=lambda:LOGGER.debug(self.grid))
         clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
 
     # Creates the top panel within the window
@@ -95,31 +96,46 @@ class GUI:
     # Set the status text
     def set_status(self, row=0, column=0):
         try:
-            self.status['text'] = 'Current Mode: {0}'.format(self.draw.upper())
+            self.status['text'] = 'Current Mode: {0}'.format(self.mode.upper())
         except AttributeError:
-            self.status = tk.Label(self.btnFrame, width=25, text='Current Mode: {0}'.format(self.draw.upper()))
+            self.status = tk.Label(self.btnFrame, width=25, text='Current Mode: {0}'.format(self.mode.upper()))
             self.status.grid(row=row, column=column, padx=10, pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing mode (start, end, walls)
     def set_mode(self, mode):
-        self.draw = mode
+        self.mode = mode
         self.set_status()
 
     # Inverts grid[row][col] at x, y and stores in self.draw. Then calls self.callback for click and drag drawing
     def set_draw(self, event):
         row, col = self.get_rc(event.x, event.y)
-        if not self.grid[row][col]:
-            self.draw = True
-        else:
-            self.draw = False
-        self.callback(event)
+
+        if self.mode == 'wall':
+            if not self.grid[row][col]:
+                self.draw = True
+            else:
+                self.draw = False
+            self.callback(event)
+        elif self.mode == 'start':
+            r, c = self.start
+            self.c.delete(self.grid[r][c])
+            self.grid[r][c] = None
+            self.start = (row, col)
+            self.c.delete(self.grid[row][col])
+            self.grid[row][col] = self.draw_rectangle(row, col, color='green')
 
     # Draws/erases rectangles at given x, y coordinates when called as event
     def callback(self, event):
+        if self.mode != 'wall':
+            return
+
         row, col = self.get_rc(event.x, event.y)
 
         # If mouse goes out of bounds, prevent error spam in logs
-        if len(self.grid) <= row or len(self.grid[0]) <= col:
+        if len(self.grid) <= row or len(self.grid[0]) <= col or row < 0 or col < 0:
+            return
+        # If (row, col) is start or end point, skip
+        if (row, col) == self.start or (row, col) == self.end:
             return
 
         if not self.grid[row][col] and self.draw:
