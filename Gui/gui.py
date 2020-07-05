@@ -6,6 +6,7 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_WH = 800
 TOPPANEL_H = 100
 
+
 class GUI:
     def __init__(self, rows, cols):
         self.draw = True
@@ -23,7 +24,7 @@ class GUI:
     def create_window(self):
         root = tk.Tk()
         root.wm_title('Pathfinding Tool')
-        root.config(background = '#FFFFFF')
+        root.config(background='#FFFFFF')
         self.window = root
 
     # Create canvas with click and click-drag events and stores as self.c
@@ -37,33 +38,45 @@ class GUI:
     def create_buttons(self, frame):
         self.btnFrame = tk.Frame(frame, width=DEFAULT_WH, height=200)
         self.btnFrame.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
-        self.btnFrame.columnconfigure(0, weight=1)
-        self.btnFrame.columnconfigure(1, weight=1)
-        self.btnFrame.columnconfigure(2, weight=1)
-        self.btnFrame.columnconfigure(3, weight=1)
-        self.btnFrame.columnconfigure(4, weight=5)
-        self.btnFrame.columnconfigure(5, weight=1)
-        startBtn = tk.Button(self.btnFrame, text='Start', command=lambda:self.set_mode('start'))
+
+        startBtn = tk.Button(self.btnFrame, text='Start',
+                             command=lambda: self.set_mode('start'))
         startBtn.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
-        wallBtn = tk.Button(self.btnFrame, text='Wall', command=lambda:self.set_mode('wall'))
+        self.btnFrame.columnconfigure(0, weight=1)
+
+        wallBtn = tk.Button(self.btnFrame, text='Wall',
+                            command=lambda: self.set_mode('wall'))
         wallBtn.grid(row=1, column=1, padx=10, pady=2, sticky=tk.W+tk.E)
-        endBtn = tk.Button(self.btnFrame, text='End', command=lambda:self.set_mode('end'))
+        self.btnFrame.columnconfigure(1, weight=1)
+
+        endBtn = tk.Button(self.btnFrame, text='End',
+                           command=lambda: self.set_mode('end'))
         endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
+        self.btnFrame.columnconfigure(2, weight=1)
+
         goBtn = tk.Button(self.btnFrame, text='GO!', command=None)
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
+        self.btnFrame.columnconfigure(3, weight=1)
+
         self.set_status(row=1, column=4)
-        clearBtn = tk.Button(self.btnFrame, text='Clear Grid', command=lambda:LOGGER.debug(self.grid))
+        self.btnFrame.columnconfigure(4, weight=5)
+
+        clearBtn = tk.Button(self.btnFrame, text='Clear Grid',
+                             command=lambda: LOGGER.debug(self.grid))
         clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
+        self.btnFrame.columnconfigure(5, weight=1)
 
     # Creates the top panel within the window
     def top_panel(self):
-        self.topFrame = tk.Frame(self.window, width=DEFAULT_WH, height=TOPPANEL_H)
+        self.topFrame = tk.Frame(
+            self.window, width=DEFAULT_WH, height=TOPPANEL_H)
         self.topFrame.grid(row=0, column=0, sticky=tk.W+tk.E)
         self.topFrame.columnconfigure(0, weight=1)
         self.create_buttons(self.topFrame)
 
     def bottom_panel(self):
-        self.btmFrame = tk.Frame(self.window, width=DEFAULT_WH, height=(DEFAULT_WH-TOPPANEL_H))
+        self.btmFrame = tk.Frame(
+            self.window, width=DEFAULT_WH, height=(DEFAULT_WH-TOPPANEL_H))
         self.btmFrame.grid(row=1, column=0)
         self.create_canvas(self.btmFrame)
 
@@ -88,18 +101,20 @@ class GUI:
         r_height = self.c.winfo_height()/self.rows
 
         return self.c.create_rectangle(col*c_width,
-            row*r_height,
-            (col+width)*c_width,
-            (row+width)*r_height,
-            fill=color)
+                                       row*r_height,
+                                       (col+width)*c_width,
+                                       (row+width)*r_height,
+                                       fill=color)
 
     # Set the status text
     def set_status(self, row=0, column=0):
         try:
             self.status['text'] = 'Current Mode: {0}'.format(self.mode.upper())
         except AttributeError:
-            self.status = tk.Label(self.btnFrame, width=25, text='Current Mode: {0}'.format(self.mode.upper()))
-            self.status.grid(row=row, column=column, padx=10, pady=2, sticky=tk.W+tk.E)
+            self.status = tk.Label(
+                self.btnFrame, width=25, text='Current Mode: {0}'.format(self.mode.upper()))
+            self.status.grid(row=row, column=column, padx=10,
+                             pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing mode (start, end, walls)
     def set_mode(self, mode):
