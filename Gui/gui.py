@@ -106,6 +106,11 @@ class GUI:
                                        (row+width)*r_height,
                                        fill=color)
 
+    # Delete rectangle at given row, col
+    def delete_rectangle(self, row, col):
+        self.c.delete(self.grid[row][col])
+        self.grid[row][col] = None
+
     # Set the status text
     def set_status(self, row=0, column=0):
         try:
@@ -133,10 +138,9 @@ class GUI:
             self.callback(event)
         elif self.mode == 'start':
             r, c = self.start
-            self.c.delete(self.grid[r][c])
-            self.grid[r][c] = None
+            self.delete_rectangle(r, c)
             self.start = (row, col)
-            self.c.delete(self.grid[row][col])
+            self.delete_rectangle(row, col)
             self.grid[row][col] = self.draw_rectangle(row, col, color='green')
 
     # Draws/erases rectangles at given x, y coordinates when called as event
@@ -156,5 +160,4 @@ class GUI:
         if not self.grid[row][col] and self.draw:
             self.grid[row][col] = self.draw_rectangle(row, col, color='black')
         elif self.grid[row][col] and not self.draw:
-            self.c.delete(self.grid[row][col])
-            self.grid[row][col] = None
+            self.delete_rectangle(row, col)
