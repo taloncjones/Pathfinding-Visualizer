@@ -54,7 +54,7 @@ class GUI:
         endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(2, weight=1)
 
-        goBtn = tk.Button(self.btnFrame, text='GO!', command=None)
+        goBtn = tk.Button(self.btnFrame, text='GO!', command=lambda: LOGGER.debug(self.grid))
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
@@ -62,7 +62,7 @@ class GUI:
         self.btnFrame.columnconfigure(4, weight=5)
 
         clearBtn = tk.Button(self.btnFrame, text='Clear Grid',
-                             command=lambda: LOGGER.debug(self.grid))
+                             command=lambda: self.clear_grid())
         clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(5, weight=1)
 
@@ -110,6 +110,16 @@ class GUI:
     def delete_rectangle(self, row, col):
         self.c.delete(self.grid[row][col])
         self.grid[row][col] = None
+
+    # Clear the grid
+    def clear_grid(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                self.delete_rectangle(row, col)
+        LOGGER.debug('Grid cleared!')
+        self.start = (-1, -1)
+        self.end = (-1, -1)
+        LOGGER.debug('Start and End reset')
 
     # Set the status text
     def set_status(self, row=0, column=0):
