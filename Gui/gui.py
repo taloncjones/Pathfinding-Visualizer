@@ -1,6 +1,8 @@
 import logging
+import time
 import tkinter as tk
-from Pathfinders import *
+import tkinter.messagebox
+import Pathfinders.dijkstra as dijkstra
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,9 +33,9 @@ class GUI:
 
     # Create canvas with click and click-drag events and stores as self.c
     def create_canvas(self, frame, row=0, column=0):
-        self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH,
-                           borderwidth=5, background='grey')
-        self.c.grid(row=row, column=column)
+        self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH, highlightthickness=0,
+                           borderwidth=0, background='grey')
+        self.c.grid(row=row, column=column, padx=5, pady=5)
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
 
@@ -57,7 +59,7 @@ class GUI:
         self.btnFrame.columnconfigure(2, weight=1)
 
         goBtn = tk.Button(self.btnFrame, text='GO!',
-                          command=lambda: LOGGER.debug(self.grid))
+                          command=lambda: self.run(self.type))
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
@@ -192,4 +194,13 @@ class GUI:
 
     # Main running function
     def run(self, type):
+        if self.start == (-1, -1) or self.end == (-1, -1):
+            LOGGER.debug('Missing start and/or end points')
+            tk.messagebox.showinfo(
+                message='Must include a start and end point!')
+            return
+        alg = dijkstra.dijkstra(self.grid, self.start, self.end)
+        while not alg.finished:
+            LOGGER.debug('Waiting...')
+            time.sleep(1)
         return
