@@ -2,7 +2,7 @@ import logging
 import time
 import tkinter as tk
 import tkinter.messagebox
-import Pathfinders.dijkstra as dijkstra
+import Pathfinders as pf
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,8 +33,8 @@ class GUI:
 
     # Create canvas with click and click-drag events and stores as self.c
     def create_canvas(self, frame, row=0, column=0):
-        self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH, highlightthickness=0,
-                           borderwidth=0, background='grey')
+        self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH,
+                           highlightthickness=0, borderwidth=0, background='grey')
         self.c.grid(row=row, column=column, padx=5, pady=5)
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
@@ -199,7 +199,7 @@ class GUI:
             tk.messagebox.showinfo(
                 message='Must include a start and end point!')
             return
-        alg = dijkstra.dijkstra(self.grid, self.start, self.end)
+        alg = pf.dijkstra.Dijkstra(self.grid, self.start, self.end)
         while not alg.finished:
             LOGGER.debug('Waiting...')
             time.sleep(1)
