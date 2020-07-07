@@ -2,7 +2,7 @@ import logging
 import time
 import tkinter as tk
 import tkinter.messagebox
-import Pathfinders as pf
+import Pathfinders.dijkstra as dijkstra
 
 LOGGER = logging.getLogger(__name__)
 
@@ -199,8 +199,13 @@ class GUI:
             tk.messagebox.showinfo(
                 message='Must include a start and end point!')
             return
-        alg = pf.dijkstra.Dijkstra(self.grid, self.start, self.end)
+
+        alg = dijkstra.Dijkstra(self.grid, self.start, self.end)
+        alg.dijkstra()
+
         while not alg.finished:
             LOGGER.debug('Waiting...')
             time.sleep(1)
+
+        LOGGER.debug(alg.grid)
         return

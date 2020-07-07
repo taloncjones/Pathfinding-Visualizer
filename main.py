@@ -6,7 +6,7 @@ import Gui.gui as GUI
 LOGGER = logging.getLogger(__name__)
 
 RUN_CONFIG = {}
-DEFAULT_RC = 100
+DEFAULT_RC = 10
 
 
 def main():
