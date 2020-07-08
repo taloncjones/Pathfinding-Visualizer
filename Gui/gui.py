@@ -18,6 +18,7 @@ class GUI:
         self.draw = True
         self.mode = 'wall'
         self.algorithm = 'dijkstra'
+        self.status = ''
         self.start = (-1, -1)
         self.end = (-1, -1)
         self.rows = rows
@@ -66,7 +67,7 @@ class GUI:
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
-        self.set_status(row=1, column=4)
+        self.set_mode_text(row=1, column=4)
         self.btnFrame.columnconfigure(4, weight=5)
 
         clearBtn = tk.Button(self.btnFrame, text='Clear Grid',
@@ -130,20 +131,20 @@ class GUI:
         self.end = (-1, -1)
         LOGGER.debug('Start and End reset')
 
-    # Set the status text
-    def set_status(self, row=0, column=0):
+    # Set the mode_text text
+    def set_mode_text(self, row=0, column=0):
         try:
-            self.status['text'] = 'Current Mode: {0}'.format(self.mode.upper())
+            self.mode_text['text'] = 'Current Mode: {0}'.format(self.mode.upper())
         except AttributeError:
-            self.status = tk.Label(
+            self.mode_text = tk.Label(
                 self.btnFrame, width=25, text='Current Mode: {0}'.format(self.mode.upper()))
-            self.status.grid(row=row, column=column, padx=10,
+            self.mode_text.grid(row=row, column=column, padx=10,
                              pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing mode (start, end, walls)
     def set_mode(self, mode):
         self.mode = mode
-        self.set_status()
+        self.set_mode_text()
 
     # Inverts grid[row][col] at x, y and stores in self.draw. Then calls self.callback for click and drag drawing
     def set_draw(self, event):
@@ -201,15 +202,23 @@ class GUI:
 
         alg.dijkstra()
 
-        green = Color('green')
-        colors = list(green.range_to(Color('red'), alg.max_step))
+        # Use alg.max_step if valid path, else use alg.max_step+1 to account for walls
+        max_step = alg.max_step if alg.finished else alg.max_step + 1
 
-        for step in range(1, alg.max_step):
+        green = Color('green')
+        colors = list(green.range_to(Color('red'), max_step))
+
+        self.status = 'Drawing'
+        LOGGER.debug('Max Step: {}\nSteps: {}'.format(max_step, alg.steps))
+
+        for step in range(1, max_step):
             for r, c in alg.steps[step]:
                 if (r,c) != self.end:
                     self.grid[r][c] = self.draw_rectangle(r, c, color=colors[step])
             time.sleep(.5)
             LOGGER.debug('Drew step: {}'.format(step))
+
+        self.status = 'Finished' if alg.finished else 'No Path'
 
     def check_dijkstra(self):
         if alg_thread.is_alive():

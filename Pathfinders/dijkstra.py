@@ -39,6 +39,7 @@ class Dijkstra:
     # Finds minimum distance vertex from dist not already in shortest path tree
     def min_distance(self, sptMatrix):
         min_path = float('inf')
+        min_index = (-1, -1)
 
         for r in range(self.rows):
             for c in range(self.cols):
@@ -71,7 +72,11 @@ class Dijkstra:
             min_r, min_c = self.min_distance(sptMatrix)
             # LOGGER.debug('New Minimum. R: {}\tC: {}'.format(min_r, min_c))
 
-            if (min_r, min_c) == self.end:
+            if (min_r, min_c) == (-1, -1):
+                LOGGER.debug('Error: No path to destination!')
+                self.get_steps()
+                return
+            elif (min_r, min_c) == self.end:
                 self.finished = True
                 LOGGER.debug('Finished!')
                 self.get_steps()
