@@ -54,17 +54,23 @@ class Dijkstra:
         self.spt = [self.end]
         end_r, end_c = self.end
         current_r, current_c = end_r, end_c
-        for i in reversed(range(1, self.grid[end_r][end_c])):
-            steps = self.steps[i]
 
-            # TODO: Add priority for up, down, left, right based on current pos. and self.start
-            # Make diagonals more costly in initial distance function. 1.5 instead of 1?
+        i = self.grid[end_r][end_c]
+        while (current_r, current_c) != self.start:
+            diag_steps = self.steps[i-3]
+            str_steps = self.steps[i-2]
+
             for r, c in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
                 test_r, test_c = current_r + r, current_c + c
-                if (test_r, test_c) in steps:
+                if (test_r, test_c) in diag_steps:
                     current_r, current_c = test_r, test_c
                     self.spt.insert(0, (current_r, current_c))
                     break
+                elif (test_r, test_c) in str_steps:
+                    current_r, current_c = test_r, test_c
+                    self.spt.insert(0, (current_r, current_c))
+                    break
+            i = self.grid[current_r][current_c]
         LOGGER.debug('SPT: {}'.format(self.spt))
 
     # Finds the maximum number of steps taken and stores steps:coord
@@ -110,9 +116,12 @@ class Dijkstra:
                 if not (0 <= test_r < self.rows) or not (0 <= test_c < self.cols):
                     continue
 
-                if self.grid[test_r][test_c] > 0 and \
-                        not sptMatrix[test_r][test_c] and \
-                        self.grid[test_r][test_c] > self.grid[min_r][min_c] + 1:
-                    self.grid[test_r][test_c] = self.grid[min_r][min_c] + 1
+                if self.grid[test_r][test_c] > 0 and not sptMatrix[test_r][test_c]:
+                    if (r, c) in [(-1, 0), (0, -1), (0, 1), (1, 0)] and \
+                            self.grid[test_r][test_c] > self.grid[min_r][min_c] + 1:
+                        self.grid[test_r][test_c] = self.grid[min_r][min_c] + 2
+                    elif (r, c) in [(-1, -1), (-1, 1), (1, -1), (1, 1)] and \
+                            self.grid[test_r][test_c] > self.grid[min_r][min_c] + 3:
+                        self.grid[test_r][test_c] = self.grid[min_r][min_c] + 3
 
         return

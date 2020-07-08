@@ -71,22 +71,22 @@ class GUI:
         self.btnFrame.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
 
         self.startBtn = tk.Button(self.btnFrame, text='Start',
-                             command=lambda: self.set_status('start'))
+                                  command=lambda: self.set_status('start'))
         self.startBtn.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(0, weight=1)
 
         self.wallBtn = tk.Button(self.btnFrame, text='Wall',
-                            command=lambda: self.set_status('wall'))
+                                 command=lambda: self.set_status('wall'))
         self.wallBtn.grid(row=1, column=1, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(1, weight=1)
 
         self.endBtn = tk.Button(self.btnFrame, text='End',
-                           command=lambda: self.set_status('end'))
+                                command=lambda: self.set_status('end'))
         self.endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(2, weight=1)
 
         self.goBtn = tk.Button(self.btnFrame, text='GO!',
-                          command=lambda: self.run(self.algorithm))
+                               command=lambda: self.run(self.algorithm))
         self.goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
@@ -94,7 +94,7 @@ class GUI:
         self.btnFrame.columnconfigure(4, weight=5)
 
         self.clearBtn = tk.Button(self.btnFrame, text='Clear Grid', state='disabled',
-                             command=lambda: self.clear_grid())
+                                  command=lambda: self.clear_grid())
         self.clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(5, weight=1)
 
@@ -179,7 +179,7 @@ class GUI:
             self.status_text = tk.Label(
                 self.btnFrame, width=25, text='Status: {0}'.format(self.status.upper()))
             self.status_text.grid(row=row, column=column, padx=10,
-                                pady=2, sticky=tk.W+tk.E)
+                                  pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing status (start, end, walls)
     def set_status(self, status):
@@ -257,7 +257,7 @@ class GUI:
                 if (r, c) != self.end:
                     self.grid[r][c] = self.draw_rectangle(
                         r, c, color=colors[step])
-            time.sleep(.5)
+            time.sleep(.2)
             LOGGER.debug('Drew step: {}'.format(step))
 
         current_step = self.start
