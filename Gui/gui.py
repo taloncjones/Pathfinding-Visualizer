@@ -25,6 +25,7 @@ class GUI:
         self.cols = cols
         self.grid = [[None for _ in range(self.cols)]
                      for _ in range(self.rows)]
+        self.line = []
         LOGGER.debug(
             'Grid created. Rows: {r}\tCols: {c}'.format(r=rows, c=cols))
 
@@ -116,16 +117,31 @@ class GUI:
                                        (row+1)*r_height,
                                        fill=color, width=border)
 
+    # Draw SPT line
+    def draw_line(self, start, end, color='black', width=1):
+        c_width = self.c.winfo_width()/self.cols
+        r_height = self.c.winfo_height()/self.rows
+
+        return self.c.create_line(start[1]*c_width + .5*c_width, start[0]*r_height + .5*r_height, end[1]*c_width + .5*c_width, end[0]*r_height + .5*r_height, fill=color, width=width)
+
     # Delete rectangle at given row, col
     def delete_rectangle(self, row, col):
         self.c.delete(self.grid[row][col])
         self.grid[row][col] = None
+
+    # Delete line at given index
+    def delete_line(self, index):
+        self.c.delete(self.line[index])
+        self.line.pop(index)
 
     # Clear the grid
     def clear_grid(self):
         for row in range(self.rows):
             for col in range(self.cols):
                 self.delete_rectangle(row, col)
+        for i in reversed(range(len(self.line))):
+            self.delete_line(i)
+
         LOGGER.debug('Grid cleared!')
         self.start = (-1, -1)
         self.end = (-1, -1)
@@ -134,12 +150,13 @@ class GUI:
     # Set the mode_text text
     def set_mode_text(self, row=0, column=0):
         try:
-            self.mode_text['text'] = 'Current Mode: {0}'.format(self.mode.upper())
+            self.mode_text['text'] = 'Current Mode: {0}'.format(
+                self.mode.upper())
         except AttributeError:
             self.mode_text = tk.Label(
                 self.btnFrame, width=25, text='Current Mode: {0}'.format(self.mode.upper()))
             self.mode_text.grid(row=row, column=column, padx=10,
-                             pady=2, sticky=tk.W+tk.E)
+                                pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing mode (start, end, walls)
     def set_mode(self, mode):
@@ -165,7 +182,8 @@ class GUI:
 
             self.start = (row, col)
             self.delete_rectangle(row, col)
-            self.grid[row][col] = self.draw_rectangle(row, col, color='green', border=3)
+            self.grid[row][col] = self.draw_rectangle(
+                row, col, color='green', border=3)
         elif self.mode == 'end':
             r, c = self.end
 
@@ -175,7 +193,8 @@ class GUI:
 
             self.end = (row, col)
             self.delete_rectangle(row, col)
-            self.grid[row][col] = self.draw_rectangle(row, col, color='red', border=3)
+            self.grid[row][col] = self.draw_rectangle(
+                row, col, color='red', border=3)
 
     # Draws/erases rectangles at given x, y coordinates when called as event
     def callback(self, event):
@@ -209,14 +228,19 @@ class GUI:
         colors = list(green.range_to(Color('red'), max_step))
 
         self.status = 'Drawing'
-        LOGGER.debug('Max Step: {}\nSteps: {}'.format(max_step, alg.steps))
 
         for step in range(1, max_step):
             for r, c in alg.steps[step]:
-                if (r,c) != self.end:
-                    self.grid[r][c] = self.draw_rectangle(r, c, color=colors[step])
+                if (r, c) != self.end:
+                    self.grid[r][c] = self.draw_rectangle(
+                        r, c, color=colors[step])
             time.sleep(.5)
             LOGGER.debug('Drew step: {}'.format(step))
+
+        current_step = self.start
+        for next_step in alg.spt:
+            self.line.append(self.draw_line(current_step, next_step, width=2))
+            current_step = next_step
 
         self.status = 'Finished' if alg.finished else 'No Path'
 

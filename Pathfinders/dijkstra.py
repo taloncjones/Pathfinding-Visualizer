@@ -49,6 +49,24 @@ class Dijkstra:
 
         return min_index
 
+    # Finds the shortest path from start to end
+    def get_shortest_path(self):
+        self.spt = [self.end]
+        end_r, end_c = self.end
+        current_r, current_c = end_r, end_c
+        for i in reversed(range(1, self.grid[end_r][end_c])):
+            steps = self.steps[i]
+
+            # TODO: Add priority for up, down, left, right based on current pos. and self.start
+            # Make diagonals more costly in initial distance function. 1.5 instead of 1?
+            for r, c in [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]:
+                test_r, test_c = current_r + r, current_c + c
+                if (test_r, test_c) in steps:
+                    current_r, current_c = test_r, test_c
+                    self.spt.insert(0, (current_r, current_c))
+                    break
+        LOGGER.debug('SPT: {}'.format(self.spt))
+
     # Finds the maximum number of steps taken and stores steps:coord
     def get_steps(self):
         self.max_step = 0
@@ -72,14 +90,15 @@ class Dijkstra:
             min_r, min_c = self.min_distance(sptMatrix)
             # LOGGER.debug('New Minimum. R: {}\tC: {}'.format(min_r, min_c))
 
-            if (min_r, min_c) == (-1, -1):
-                LOGGER.debug('Error: No path to destination!')
+            # If error (no path) or end
+            if (min_r, min_c) == (-1, -1) or (min_r, min_c) == self.end:
+                if (min_r, min_c) == self.end:
+                    self.finished = True
+                    LOGGER.debug('Finished!')
+                else:
+                    LOGGER.debug('Error: No path to destination!')
                 self.get_steps()
-                return
-            elif (min_r, min_c) == self.end:
-                self.finished = True
-                LOGGER.debug('Finished!')
-                self.get_steps()
+                self.get_shortest_path()
                 return
 
             sptMatrix[min_r][min_c] = True
