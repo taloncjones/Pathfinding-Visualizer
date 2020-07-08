@@ -1,5 +1,6 @@
 import logging
 import copy
+import collections
 
 LOGGER = logging.getLogger(__name__)
 
@@ -16,6 +17,7 @@ class Dijkstra:
         self.start = start
         self.end = end
         self.finished = False
+        self.steps = collections.defaultdict(list)
 
         self.create_distance_grid()
 
@@ -46,6 +48,20 @@ class Dijkstra:
 
         return min_index
 
+    # Finds the maximum number of steps taken and stores steps:coord
+    def get_steps(self):
+        self.max_step = 0
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.grid[r][c] != float('inf'):
+                    # Store coords for step #
+                    # e.g. {1: [(r,c)]} 1 contains all coords with step count = 1
+                    self.steps[self.grid[r][c]].insert(0, (r, c))
+
+                    # Store max step # in self.max_step
+                    if self.grid[r][c] > self.max_step:
+                        self.max_step = self.grid[r][c]
+
     # Main function for finding shortest path
     def dijkstra(self):
         sptMatrix = [[False for _ in range(self.cols)]
@@ -58,6 +74,7 @@ class Dijkstra:
             if (min_r, min_c) == self.end:
                 self.finished = True
                 LOGGER.debug('Finished!')
+                self.get_steps()
                 return
 
             sptMatrix[min_r][min_c] = True

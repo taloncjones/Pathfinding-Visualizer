@@ -1,20 +1,23 @@
 import logging
 import time
+from colour import Color
 import tkinter as tk
 import tkinter.messagebox
 import Pathfinders.dijkstra as dijkstra
+import threading
 
 LOGGER = logging.getLogger(__name__)
 
 DEFAULT_WH = 800
 TOPPANEL_H = 100
+TIMEOUT = 60
 
 
 class GUI:
     def __init__(self, rows, cols):
         self.draw = True
         self.mode = 'wall'
-        self.type = 'dijkstra'
+        self.algorithm = 'dijkstra'
         self.start = (-1, -1)
         self.end = (-1, -1)
         self.rows = rows
@@ -59,7 +62,7 @@ class GUI:
         self.btnFrame.columnconfigure(2, weight=1)
 
         goBtn = tk.Button(self.btnFrame, text='GO!',
-                          command=lambda: self.run(self.type))
+                          command=lambda: self.run(self.algorithm))
         goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
 
@@ -102,15 +105,15 @@ class GUI:
         return row, col
 
     # Draw a rectangle with given color
-    def draw_rectangle(self, row, col, width=1, color='black'):
+    def draw_rectangle(self, row, col, color='black', border=1):
         c_width = self.c.winfo_width()/self.cols
         r_height = self.c.winfo_height()/self.rows
 
         return self.c.create_rectangle(col*c_width,
                                        row*r_height,
-                                       (col+width)*c_width,
-                                       (row+width)*r_height,
-                                       fill=color)
+                                       (col+1)*c_width,
+                                       (row+1)*r_height,
+                                       fill=color, width=border)
 
     # Delete rectangle at given row, col
     def delete_rectangle(self, row, col):
@@ -161,7 +164,7 @@ class GUI:
 
             self.start = (row, col)
             self.delete_rectangle(row, col)
-            self.grid[row][col] = self.draw_rectangle(row, col, color='green')
+            self.grid[row][col] = self.draw_rectangle(row, col, color='green', border=3)
         elif self.mode == 'end':
             r, c = self.end
 
@@ -171,7 +174,7 @@ class GUI:
 
             self.end = (row, col)
             self.delete_rectangle(row, col)
-            self.grid[row][col] = self.draw_rectangle(row, col, color='red')
+            self.grid[row][col] = self.draw_rectangle(row, col, color='red', border=3)
 
     # Draws/erases rectangles at given x, y coordinates when called as event
     def callback(self, event):
@@ -192,20 +195,45 @@ class GUI:
         elif self.grid[row][col] and not self.draw:
             self.delete_rectangle(row, col)
 
+    # Test function for dijkstra
+    def run_dijkstra(self):
+        alg = dijkstra.Dijkstra(self.grid, self.start, self.end)
+
+        alg.dijkstra()
+
+        green = Color('green')
+        colors = list(green.range_to(Color('red'), alg.max_step))
+
+        for step in range(1, alg.max_step):
+            for r, c in alg.steps[step]:
+                if (r,c) != self.end:
+                    self.grid[r][c] = self.draw_rectangle(r, c, color=colors[step])
+            time.sleep(.5)
+            LOGGER.debug('Drew step: {}'.format(step))
+
+    def check_dijkstra(self):
+        if alg_thread.is_alive():
+            self.window.after(20, self.check_dijkstra)
+        else:
+            tk.messagebox.showinfo(
+                message='Algorithm finished!'
+            )
+
     # Main running function
-    def run(self, type):
+    def run(self, algorithm):
+        # Check if start and end are assigned
         if self.start == (-1, -1) or self.end == (-1, -1):
             LOGGER.debug('Missing start and/or end points')
             tk.messagebox.showinfo(
                 message='Must include a start and end point!')
             return
 
-        alg = dijkstra.Dijkstra(self.grid, self.start, self.end)
-        alg.dijkstra()
+        global alg_thread
 
-        while not alg.finished:
-            LOGGER.debug('Waiting...')
-            time.sleep(1)
+        if algorithm == 'dijkstra':
+            alg_thread = threading.Thread(target=self.run_dijkstra)
+            alg_thread.daemon = True
+            alg_thread.start()
+            self.window.after(20, self.check_dijkstra)
 
-        LOGGER.debug(alg.grid)
         return
