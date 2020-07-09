@@ -15,8 +15,8 @@ def main():
         '-rows', required=False, default=DEFAULT_RC, help='The desired number of rows in the application\'s grid Default: {r}'.format(r=DEFAULT_RC))
     parser.add_argument(
         '-cols', required=False, default=DEFAULT_RC, help='The desired number of columns in the application\'s grid. Default: {c}'.format(c=DEFAULT_RC))
-    parser.add_argument('--noop', dest='noop', action='store_true',
-                        help="Provide flag --noop if you want the operation to be a no-op")
+    parser.add_argument(
+        '--noop', dest='noop', action='store_true', help="Provide flag --noop if you want the operation to be a no-op")
     parser.set_defaults(noop=False)
 
     args = parser.parse_args()

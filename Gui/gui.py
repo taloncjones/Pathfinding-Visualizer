@@ -38,11 +38,13 @@ class GUI:
     # Create canvas with click and click-drag events and stores as self.c
     def create_canvas(self, frame, row=0, column=0):
         self.c = tk.Canvas(self.btmFrame, width=DEFAULT_WH, height=DEFAULT_WH,
-                           highlightthickness=0, borderwidth=0, background='grey')
+                           highlightthickness=0, borderwidth=0,
+                           background='grey')
         self.c.grid(row=row, column=column, padx=5, pady=5)
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
 
+    # Enables/disables control buttons depending on state
     def button_state(self, mode):
         if mode == 'clear':
             self.startBtn['state'] = 'disabled'
@@ -66,6 +68,7 @@ class GUI:
             self.clearBtn['state'] = 'disabled'
             self.status = 'wall'
 
+    # Render control buttons
     def create_buttons(self, frame):
         self.btnFrame = tk.Frame(frame, width=DEFAULT_WH, height=200)
         self.btnFrame.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
@@ -93,7 +96,8 @@ class GUI:
         self.set_status_text(row=1, column=4)
         self.btnFrame.columnconfigure(4, weight=5)
 
-        self.clearBtn = tk.Button(self.btnFrame, text='Clear Grid', state='disabled',
+        self.clearBtn = tk.Button(self.btnFrame, text='Clear Grid',
+                                  state='disabled',
                                   command=lambda: self.clear_grid())
         self.clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(5, weight=1)
@@ -113,6 +117,7 @@ class GUI:
         self.btmFrame.grid(row=1, column=0)
         self.create_canvas(self.btmFrame)
 
+    # Call this to render GUI
     def render(self):
         self.create_window()
         self.top_panel()
@@ -128,7 +133,7 @@ class GUI:
         row = int(y//r_height)
         return row, col
 
-    # Draw a rectangle with given color
+    # Draw a rectangle with given color, border thickness
     def draw_rectangle(self, row, col, color='black', border=1):
         c_width = self.c.winfo_width()/self.cols
         r_height = self.c.winfo_height()/self.rows
@@ -144,7 +149,11 @@ class GUI:
         c_width = self.c.winfo_width()/self.cols
         r_height = self.c.winfo_height()/self.rows
 
-        return self.c.create_line(start[1]*c_width + .5*c_width, start[0]*r_height + .5*r_height, end[1]*c_width + .5*c_width, end[0]*r_height + .5*r_height, fill=color, width=width)
+        return self.c.create_line(start[1]*c_width + .5*c_width,
+                                  start[0]*r_height + .5*r_height,
+                                  end[1]*c_width + .5*c_width,
+                                  end[0] * r_height + .5*r_height,
+                                  fill=color, width=width)
 
     # Delete rectangle at given row, col
     def delete_rectangle(self, row, col):
@@ -156,7 +165,8 @@ class GUI:
         self.c.delete(self.line[index])
         self.line.pop(index)
 
-    # Clear the grid
+    # Clear the grid by deleting all rectangles, lines, and set self.start/end
+    # to default
     def clear_grid(self):
         for row in range(self.rows):
             for col in range(self.cols):
@@ -177,7 +187,8 @@ class GUI:
                 self.status.upper())
         except AttributeError:
             self.status_text = tk.Label(
-                self.btnFrame, width=25, text='Status: {0}'.format(self.status.upper()))
+                self.btnFrame, width=25,
+                text='Status: {0}'.format(self.status.upper()))
             self.status_text.grid(row=row, column=column, padx=10,
                                   pady=2, sticky=tk.W+tk.E)
 
@@ -186,7 +197,8 @@ class GUI:
         self.status = status
         self.set_status_text()
 
-    # Inverts grid[row][col] at x, y and stores in self.draw. Then calls self.callback for click and drag drawing
+    # Inverts grid[row][col] at x, y and stores in self.draw. Then calls
+    # self.callback for click and drag drawing
     def set_draw(self, event):
         row, col = self.get_rc(event.x, event.y)
 
@@ -227,7 +239,8 @@ class GUI:
         row, col = self.get_rc(event.x, event.y)
 
         # If mouse goes out of bounds, prevent error spam in logs
-        if len(self.grid) <= row or len(self.grid[0]) <= col or row < 0 or col < 0:
+        if len(self.grid) <= row or \
+                len(self.grid[0]) <= col or row < 0 or col < 0:
             return
         # If (row, col) is start or end point, skip
         if (row, col) == self.start or (row, col) == self.end:
@@ -244,7 +257,8 @@ class GUI:
 
         alg.dijkstra()
 
-        # Use alg.max_step if valid path, else use alg.max_step+1 to account for walls
+        # Use alg.max_step if valid path, else use alg.max_step+1 to account
+        # for walls
         max_step = alg.max_step if alg.finished else alg.max_step + 1
 
         green = Color('green')
