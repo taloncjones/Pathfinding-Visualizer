@@ -1,19 +1,25 @@
 # Pathfinding Visualizer
 
-Intent of this project is to create a tool that allows the user to visualize pathfinding algorithms using different maps.
+Fun little tool for visualizing different pathfinding algorithms. After drawing walls on the canvas, specifying a start and end point, and hitting GO!,
+the tool will use the specified algorithm (currently just Dijkstra's) to find and display the shortest path between the two points.
+
+#### Installation
+
+Install required packages:
+
+```
+pip install -r requirements.txt
+```
 
 #### Usage
 
 ```
 usage: main.py [-h] [--noop]
-               driverType driverPath keyFile gsheetURL emailCredentials
-
-positional arguments:
-  rows              [Optional] Provide the number of rows for the app table. Default: 10
-  cols              [Optional] Provide the number of columns for the app table. Default: 10
 
 optional arguments:
   -h, --help        show this help message and exit
+  --rows=[int]      [Optional] Provide the number of rows for the app table. Default: 25
+  --cols=[int]      [Optional] Provide the number of columns for the app table. Default: 25
   --noop            Provide flag --noop if you want the operation to be a no-op
 ```
 
@@ -21,7 +27,5 @@ optional arguments:
 #### Authors
 
 * Talon Jones - [taloncjones](https://github.com/taloncjones) 
-
-
 
 #### License 
