@@ -51,6 +51,11 @@ class Dijkstra:
 
     # Finds the shortest path from start to end
     def get_shortest_path(self):
+        LOGGER.debug('Calculating shortest path...')
+        if not self.finished:
+            LOGGER.debug('No path found')
+            return
+
         self.spt = [self.end]
         end_r, end_c = self.end
         current_r, current_c = end_r, end_c
@@ -75,6 +80,7 @@ class Dijkstra:
 
     # Finds the maximum number of steps taken and stores steps:coord
     def get_steps(self):
+        LOGGER.debug('Calculating steps...')
         self.max_step = 0
         for r in range(self.rows):
             for c in range(self.cols):
@@ -86,6 +92,7 @@ class Dijkstra:
                     # Store max step # in self.max_step
                     if self.grid[r][c] > self.max_step:
                         self.max_step = self.grid[r][c]
+        LOGGER.debug('Finished')
 
     # Main function for finding shortest path
     def dijkstra(self):

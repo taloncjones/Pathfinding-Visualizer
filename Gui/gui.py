@@ -275,9 +275,10 @@ class GUI:
             LOGGER.debug('Drew step: {}'.format(step))
 
         current_step = self.start
-        for next_step in alg.spt:
-            self.line.append(self.draw_line(current_step, next_step, width=2))
-            current_step = next_step
+        if alg.finished:
+            for next_step in alg.spt:
+                self.line.append(self.draw_line(current_step, next_step, width=2))
+                current_step = next_step
 
         self.set_status('Finished' if alg.finished else 'No Path')
 
