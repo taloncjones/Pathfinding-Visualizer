@@ -43,6 +43,8 @@ class GUI:
         self.c.grid(row=row, column=column, padx=5, pady=5)
         self.c.bind('<ButtonPress-1>', self.set_draw)
         self.c.bind('<B1-Motion>', self.callback)
+        self.c.bind('<Key>', self.set_status)
+        self.c.focus_set()
 
     # Enables/disables control buttons depending on state
     def button_state(self, mode):
@@ -65,7 +67,7 @@ class GUI:
             self.wallBtn['state'] = 'normal'
             self.endBtn['state'] = 'normal'
             self.goBtn['state'] = 'normal'
-            self.clearBtn['state'] = 'disabled'
+            self.clearBtn['state'] = 'normal'
             self.status = 'wall'
 
     # Render control buttons
@@ -73,22 +75,22 @@ class GUI:
         self.btnFrame = tk.Frame(frame, width=DEFAULT_WH, height=200)
         self.btnFrame.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
 
-        self.startBtn = tk.Button(self.btnFrame, text='Start',
+        self.startBtn = tk.Button(self.btnFrame, text='Start', underline=0,
                                   command=lambda: self.set_status('start'))
         self.startBtn.grid(row=1, column=0, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(0, weight=1)
 
-        self.wallBtn = tk.Button(self.btnFrame, text='Wall',
+        self.wallBtn = tk.Button(self.btnFrame, text='Wall', underline=0,
                                  command=lambda: self.set_status('wall'))
         self.wallBtn.grid(row=1, column=1, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(1, weight=1)
 
-        self.endBtn = tk.Button(self.btnFrame, text='End',
+        self.endBtn = tk.Button(self.btnFrame, text='End', underline=0,
                                 command=lambda: self.set_status('end'))
         self.endBtn.grid(row=1, column=2, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(2, weight=1)
 
-        self.goBtn = tk.Button(self.btnFrame, text='GO!',
+        self.goBtn = tk.Button(self.btnFrame, text='GO!', underline=0,
                                command=lambda: self.run(self.algorithm))
         self.goBtn.grid(row=1, column=3, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(3, weight=1)
@@ -96,8 +98,7 @@ class GUI:
         self.set_status_text(row=1, column=4)
         self.btnFrame.columnconfigure(4, weight=5)
 
-        self.clearBtn = tk.Button(self.btnFrame, text='Clear Grid',
-                                  state='disabled',
+        self.clearBtn = tk.Button(self.btnFrame, text='Clear Grid', underline=0,
                                   command=lambda: self.clear_grid())
         self.clearBtn.grid(row=1, column=5, padx=10, pady=2, sticky=tk.W+tk.E)
         self.btnFrame.columnconfigure(5, weight=1)
@@ -178,6 +179,7 @@ class GUI:
         self.start = (-1, -1)
         self.end = (-1, -1)
         LOGGER.debug('Start and End reset')
+        self.set_status('wall')
         self.button_state('drawing')
 
     # Set the status_text text
@@ -193,7 +195,31 @@ class GUI:
                                   pady=2, sticky=tk.W+tk.E)
 
     # Set the drawing status (start, end, walls)
+    # Function callable by tkinter key bind event
     def set_status(self, status):
+        if isinstance(status, tkinter.Event):
+            # Ignore key press if working or drawing
+            if self.status in {'working', 'drawing'}:
+                return
+            # Always allow clear_grid()
+            if status.char == 'c':
+                self.clear_grid()
+                return
+            # Ignore key press if 'finished' or 'no path'
+            # clear_grid will reset to 'wall' and allow key press
+            if self.status in {'wall', 'start', 'end'}:
+                if status.char == 'w':
+                    status = 'wall'
+                elif status.char == 'e':
+                    status = 'end'
+                elif status.char == 's':
+                    status = 'start'
+                elif status.char == 'g':
+                    self.run(self.algorithm)
+                    return
+            else:
+                return
+
         self.status = status
         self.set_status_text()
 
@@ -264,7 +290,7 @@ class GUI:
         green = Color('green')
         colors = list(green.range_to(Color('red'), max_step))
 
-        self.set_status('Drawing')
+        self.set_status('drawing')
 
         for step in range(1, max_step):
             for r, c in alg.steps[step]:
@@ -280,7 +306,7 @@ class GUI:
                 self.line.append(self.draw_line(current_step, next_step, width=2))
                 current_step = next_step
 
-        self.set_status('Finished' if alg.finished else 'No Path')
+        self.set_status('finished' if alg.finished else 'no path')
 
     def check_dijkstra(self):
         if alg_thread.is_alive():
